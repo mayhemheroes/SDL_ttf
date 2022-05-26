@@ -1,5 +1,5 @@
 image: ghcr.io/capuanob/sdl-ttf-fuzz:latest
-project: sdlttf
+project: sdl-ttf
 target: sdl-ttf-fuzzer
 tests:
   - file://fuzz/corpus
