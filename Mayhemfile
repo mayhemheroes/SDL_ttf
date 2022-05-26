@@ -6,5 +6,5 @@ tests:
 
 cmds:
   - cmd: /SDL2_ttf-fuzzer -close_fd_mask=2
-    max_length: 200000
+    max_length: 900000
     libfuzzer: true
