@@ -92,6 +92,7 @@ cmake_dependent_option(TTF_WITH_FREETYPE_VENDORED "Use vendored freetype library
 option(TTF_WITH_HARFBUZZ "Use harfbuzz to improve text shaping" OFF)
 cmake_dependent_option(TTF_WITH_HARFBUZZ_VENDORED "Use vendored harfbuzz library" ${VENDORED_DEFAULT} TTF_WITH_HARFBUZZ OFF)
 
+option(INSTRUMENT "Instrument the binaries and executables for libFuzzer fuzzing" OFF)
 option(BUILD_SAMPLES "Build the SDL2_ttf sample program(s)" ON)
 option(BUILD_SHARED_LIBS "Build the library as a shared library" ON)
 option(TTF_DISABLE_INSTALL "Disable installing SDL2_ttf" OFF)
@@ -120,6 +121,11 @@ if (BUILD_SHARED_LIBS)
     target_link_libraries(SDL2_ttf PRIVATE SDL2::SDL2)
 else()
     target_link_libraries(SDL2_ttf PRIVATE SDL2::SDL2-static)
+endif()
+
+if (INSTRUMENT)
+    target_compile_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
+    target_link_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
 endif()
 
 set(INSTALL_EXTRA_TARGETS)
@@ -313,6 +319,7 @@ if (NOT TTF_DISABLE_INSTALL)
         add_executable(glfont glfont.c)
         add_executable(showfont showfont.c)
 
+
         set(OpenGL_GL_PREFERENCE GLVND)
         find_package(OpenGL)
         if (TARGET OpenGL::OpenGL)
@@ -337,6 +344,15 @@ if (NOT TTF_DISABLE_INSTALL)
             else()
                 target_link_libraries(${prog} PRIVATE SDL2::SDL2-static)
             endif()
+            if (INSTRUMENT)
+                target_compile_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
+                target_link_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
+            endif()
         endforeach()
     endif()
+endif()
+
+
+if (INSTRUMENT)
+    add_subdirectory(fuzz)
 endif()
