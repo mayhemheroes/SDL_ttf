@@ -161,6 +161,11 @@ if(SDL2TTF_BUILD_SHARED_LIBS)
     set_property(TARGET SDL2_ttf APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SDL2_SHARED)
 endif()
 
+if (INSTRUMENT)
+    target_compile_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
+    target_link_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
+endif()
+
 set(INSTALL_EXTRA_TARGETS)
 set(PC_LIBS)
 set(PC_REQUIRES)
@@ -404,4 +409,9 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.17")
     set_target_properties(SDL2::ttf PROPERTIES
         DEPRECATION "Use SDL2_ttf::SDL2_ttf or SDL2_ttf::SDL2_ttf-static instead"
     )
+endif()
+
+
+if (INSTRUMENT)
+    add_subdirectory(fuzz)
 endif()
