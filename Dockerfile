@@ -22,6 +22,7 @@ FROM --platform=linux/amd64 ubuntu:20.04
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y libsdl2-dev
 COPY --from=builder /SDL_ttf/build/fuzz/SDL2_ttf-fuzzer /SDL2_ttf-fuzzer
+COPY --from=builder /SDL_ttf/build/libSDL2_ttf-2.0.so.0 /usr/lib
 COPY --from=builder /SDL_ttf/fuzz/corpus /corpus
 
 ## Set up fuzzing!
