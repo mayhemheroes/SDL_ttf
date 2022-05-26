@@ -1,0 +1,9 @@
+project: sdl-ttf
+target: sdl-ttf-fuzzer
+testsuite:
+  - file://fuzz/corpus
+
+cmds:
+  - cmd: /SDL2_ttf-fuzzer
+    max_length: 900000
+    libfuzzer: true
