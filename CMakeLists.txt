@@ -50,7 +50,9 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 include(CheckSymbolExists)
 
+
 option(CMAKE_POSITION_INDEPENDENT_CODE "Build static libraries with -fPIC" ON)
+option(INSTRUMENT "Instrument the binaries and executables for libFuzzer fuzzing" OFF)
 option(BUILD_SHARED_LIBS "Build the library as a shared library" ON)
 
 option(SDL2TTF_SAMPLES "Build the SDL2_ttf sample program(s)" ${SDL2TTF_ROOTPROJECT})
@@ -159,6 +161,11 @@ if(SDL2TTF_BUILD_SHARED_LIBS)
     # Use `Compatible Interface Properties` to ensure a shared SDL2_ttf is linked to a shared SDL2 library
     set_property(TARGET SDL2_ttf PROPERTY INTERFACE_SDL2_SHARED ${SDL2TTF_BUILD_SHARED_LIBS})
     set_property(TARGET SDL2_ttf APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SDL2_SHARED)
+endif()
+
+if (INSTRUMENT)
+    target_compile_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
+    target_link_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
 endif()
 
 set(INSTALL_EXTRA_TARGETS)
@@ -393,6 +400,10 @@ if(SDL2TTF_SAMPLES)
             target_link_libraries(${prog} PRIVATE SDL2::SDL2main)
         endif()
         target_link_libraries(${prog} PRIVATE ${sdl2_target_name})
+        if (INSTRUMENT)
+            target_compile_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
+            target_link_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
+        endif()
     endforeach()
 endif()
 
@@ -404,4 +415,9 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.17")
     set_target_properties(SDL2::ttf PROPERTIES
         DEPRECATION "Use SDL2_ttf::SDL2_ttf or SDL2_ttf::SDL2_ttf-static instead"
     )
+endif()
+
+
+if (INSTRUMENT)
+    add_subdirectory(fuzz)
 endif()
