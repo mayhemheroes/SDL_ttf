@@ -1,10 +1,9 @@
-image: ghcr.io/capuanob/sdl-ttf-fuzz:latest
 project: sdl-ttf
 target: sdl-ttf-fuzzer
-tests:
+testsuite:
   - file://fuzz/corpus
 
 cmds:
-  - cmd: /SDL2_ttf-fuzzer -close_fd_mask=2
+  - cmd: /SDL2_ttf-fuzzer
     max_length: 900000
     libfuzzer: true
