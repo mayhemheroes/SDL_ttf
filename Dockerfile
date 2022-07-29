@@ -3,13 +3,12 @@ FROM --platform=linux/amd64 ubuntu:20.04 as builder
 
 ## Install build dependencies.
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y git clang cmake make libsdl2-dev
+    DEBIAN_FRONTEND=noninteractive apt-get install -y clang cmake make libsdl2-dev
 
 ## Add source code to the build stage.
 WORKDIR /
-RUN git clone --recurse-submodules https://github.com/capuanob/SDL_ttf.git
+ADD . /SDL_ttf
 WORKDIR SDL_ttf
-RUN git checkout mayhem
 
 ## Build
 RUN mkdir build
@@ -27,4 +26,4 @@ COPY --from=builder /SDL_ttf/fuzz/corpus /corpus
 
 ## Set up fuzzing!
 ENTRYPOINT []
-CMD /SDL2_ttf-fuzzer /corpus -close_fd_mask=2
+CMD /SDL2_ttf-fuzzer /corpus
