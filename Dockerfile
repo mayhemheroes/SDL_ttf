@@ -3,12 +3,13 @@ FROM --platform=linux/amd64 ubuntu:20.04 as builder
 
 ## Install build dependencies.
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y clang cmake make libsdl2-dev
+    DEBIAN_FRONTEND=noninteractive apt-get install -y clang git cmake make libsdl2-dev
 
 ## Add source code to the build stage.
 WORKDIR /
 ADD . /SDL_ttf
 WORKDIR SDL_ttf
+RUN git submodule update --init --recursive
 
 ## Build
 RUN mkdir build
