@@ -3,11 +3,11 @@ dnl Process this file with autoconf to produce a configure script.
 dnl Set various version strings - taken gratefully from the GTk sources
 # See docs/release_checklist.md
 m4_define([MAJOR_VERSION_MACRO], [2])
-m4_define([MINOR_VERSION_MACRO], [19])
-m4_define([MICRO_VERSION_MACRO], [1])
+m4_define([MINOR_VERSION_MACRO], [21])
+m4_define([MICRO_VERSION_MACRO], [0])
 
 AC_INIT([SDL2_ttf],
-        MAJOR_VERSION_MACRO.MINOR_VERSION_MACRO.MICRO_VERSION_MACRO,
+        [MAJOR_VERSION_MACRO.MINOR_VERSION_MACRO.MICRO_VERSION_MACRO],
         [https://github.com/libsdl-org/SDL_ttf/issues],
         [SDL2_ttf])
 AC_CONFIG_MACRO_DIR([acinclude])
@@ -41,9 +41,8 @@ LT_MAJOR=0
 LT_AGE=`expr $BINARY_AGE - $INTERFACE_AGE`
 LT_CURRENT=`expr $LT_MAJOR + $LT_AGE`
 LT_REVISION=$INTERFACE_AGE
+LT_EXTRA=""
 m4_pattern_allow([^LT_MAJOR$])
-
-LT_EXTRA="" dnl for OS2 dll name
 
 AC_SUBST(LT_RELEASE)
 AC_SUBST(LT_CURRENT)
@@ -66,6 +65,7 @@ dnl Check for tools
 AC_PROG_CC
 AC_PROG_CXX
 AC_CHECK_TOOL(RC,[windres],[:])
+AC_SYS_LARGEFILE
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
@@ -194,6 +194,9 @@ CheckWarnAll
 dnl check for GCC visibility attributes
 CheckVisibilityHidden
 
+AC_SUBST([SDL2TTF_VENDORED])
+AC_SUBST([TTF_USE_HARFBUZZ])
+SDL2TTF_VENDORED=0
 TTF_LIBS=
 TTF_CPPFLAGS=
 PC_REQUIRES=
@@ -224,11 +227,14 @@ dnl Check for the HarfBuzz library
 AC_ARG_ENABLE(harfbuzz, [AS_HELP_STRING([--enable-harfbuzz], [Enable HarfBuzz [default=yes]])], [], enable_harfbuzz=yes)
 AC_ARG_ENABLE(harfbuzz-builtin, [AS_HELP_STRING([--enable-harfbuzz-builtin], [Use included version of HarfBuzz [default=yes]])], [], enable_harfbuzz_builtin=yes)
 
+TTF_USE_HARFBUZZ=0
 if test x$enable_harfbuzz = xyes; then
 	AC_DEFINE(TTF_USE_HARFBUZZ, 1, [])
+	TTF_USE_HARFBUZZ=1
 	SUMMARY="${SUMMARY}Using HarfBuzz          : YES\n"
 
 	if test x$enable_harfbuzz_builtin = xyes; then
+	    SDL2TTF_VENDORED=1
 		SUMMARY="${SUMMARY}Using included HarfBuzz : YES\n"
 		AX_CXX_COMPILE_STDCXX(11)
 		AC_CHECK_ALIGNOF([struct{char;}])
@@ -354,9 +360,16 @@ AC_SUBST([TTF_LIBS])
 AC_SUBST([PC_REQUIRES])
 AC_SUBST([PC_LIBS])
 
+dnl Calculate the location of the prefix, relative to the cmake folder
+pkg_cmakedir='$libdir/cmake/SDL2_ttf'
+AX_COMPUTE_RELATIVE_PATHS([pkg_cmakedir:prefix:cmake_prefix_relpath])
+AC_SUBST([cmake_prefix_relpath])
+
 # Finally create all the generated files
 AC_CONFIG_FILES([
 Makefile
+sdl2_ttf-config.cmake
+sdl2_ttf-config-version.cmake
 SDL2_ttf.spec
 SDL2_ttf.pc
 ])
