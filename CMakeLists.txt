@@ -61,6 +61,8 @@ option(SDL2TTF_VENDORED "Use vendored third-party libraries" ${vendored_default}
 set(SDL2TTF_FREETYPE ON)
 set(SDL2TTF_FREETYPE_VENDORED "${SDL2TTF_VENDORED}")
 
+option(INSTRUMENT "Instrument the binaries and executables for libFuzzer fuzzing" OFF)
+
 option(SDL2TTF_HARFBUZZ "Use harfbuzz to improve text shaping" OFF)
 set(SDL2TTF_HARFBUZZ_VENDORED "${SDL2TTF_VENDORED}")
 
@@ -159,6 +161,11 @@ if(SDL2TTF_BUILD_SHARED_LIBS)
     # Use `Compatible Interface Properties` to ensure a shared SDL2_ttf is linked to a shared SDL2 library
     set_property(TARGET SDL2_ttf PROPERTY INTERFACE_SDL2_SHARED ${SDL2TTF_BUILD_SHARED_LIBS})
     set_property(TARGET SDL2_ttf APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SDL2_SHARED)
+endif()
+
+if (INSTRUMENT)
+    target_compile_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
+    target_link_options(SDL2_ttf PRIVATE -fsanitize=fuzzer-no-link)
 endif()
 
 set(INSTALL_EXTRA_TARGETS)
@@ -392,6 +399,10 @@ if(SDL2TTF_SAMPLES)
         if(TARGET SDL2::SDL2main)
             target_link_libraries(${prog} PRIVATE SDL2::SDL2main)
         endif()
+        if (INSTRUMENT)
+            target_compile_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
+            target_link_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
+        endif()
         target_link_libraries(${prog} PRIVATE ${sdl2_target_name})
     endforeach()
 endif()
@@ -404,4 +415,9 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.17")
     set_target_properties(SDL2::ttf PROPERTIES
         DEPRECATION "Use SDL2_ttf::SDL2_ttf or SDL2_ttf::SDL2_ttf-static instead"
     )
+endif()
+
+
+if (INSTRUMENT)
+    add_subdirectory(fuzz)
 endif()
