@@ -50,9 +50,7 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 include(CheckSymbolExists)
 
-
 option(CMAKE_POSITION_INDEPENDENT_CODE "Build static libraries with -fPIC" ON)
-option(INSTRUMENT "Instrument the binaries and executables for libFuzzer fuzzing" OFF)
 option(BUILD_SHARED_LIBS "Build the library as a shared library" ON)
 
 option(SDL2TTF_SAMPLES "Build the SDL2_ttf sample program(s)" ${SDL2TTF_ROOTPROJECT})
@@ -62,6 +60,8 @@ option(SDL2TTF_VENDORED "Use vendored third-party libraries" ${vendored_default}
 # For style consistency, create a SDL2TTF_FREETYPE CMake variable. This variable is NOT configurable.
 set(SDL2TTF_FREETYPE ON)
 set(SDL2TTF_FREETYPE_VENDORED "${SDL2TTF_VENDORED}")
+
+option(INSTRUMENT "Instrument the binaries and executables for libFuzzer fuzzing" OFF)
 
 option(SDL2TTF_HARFBUZZ "Use harfbuzz to improve text shaping" OFF)
 set(SDL2TTF_HARFBUZZ_VENDORED "${SDL2TTF_VENDORED}")
@@ -399,11 +399,11 @@ if(SDL2TTF_SAMPLES)
         if(TARGET SDL2::SDL2main)
             target_link_libraries(${prog} PRIVATE SDL2::SDL2main)
         endif()
-        target_link_libraries(${prog} PRIVATE ${sdl2_target_name})
         if (INSTRUMENT)
             target_compile_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
             target_link_options(${prog} PRIVATE -fsanitize=fuzzer-no-link)
         endif()
+        target_link_libraries(${prog} PRIVATE ${sdl2_target_name})
     endforeach()
 endif()
 
