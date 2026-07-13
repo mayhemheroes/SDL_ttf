@@ -1,0 +1,14 @@
+project: sdl-ttf
+target: sdl-ttf-fuzzer
+
+cmds:
+  - cmd: /mayhem/fuzz_open_font_from_mem
+    max_length: 900000
+    libfuzzer: true
+
+# Owner/project are hardcoded in the server-tar URL: $MAYHEM_PROJECT expands to the
+# literal repo name "SDL_ttf" (underscore + capitals), not the normalized Mayhem project
+# slug "sdl-ttf", which fails run-creation ("You do not have access to use a test suite").
+testsuite:
+  - https://app.mayhem.security/mayhemheroes/sdl-ttf/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/sdl-ttf-fuzzer/testsuite
